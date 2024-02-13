@@ -53,6 +53,8 @@ services:
       - database
     networks:
       default:
+        aliases:
+          - teslalogger_grafana
       nginx:
         aliases:
           - teslalogger_grafana

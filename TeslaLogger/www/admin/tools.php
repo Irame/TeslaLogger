@@ -1,4 +1,4 @@
-<?PHP 
+<?PHP
 
 function isRedirectDockerToHost()
 {
@@ -27,10 +27,10 @@ function GetTeslaloggerHTTPPort()
 	{
 		$content = file_get_contents("/etc/teslalogger/settings.json");
 		$j = json_decode($content);
-		if (!empty($j->{"HTTPPort"})) 
-            $port = $j->{"HTTPPort"};	
+		if (!empty($j->{"HTTPPort"}))
+            $port = $j->{"HTTPPort"};
     }
-    
+
     return $port;
 }
 
@@ -39,7 +39,7 @@ function GetTeslaloggerURL($path)
     $port = GetTeslaloggerHTTPPort();
 
     $url = "http://localhost:$port/";
-    
+
     if (isRedirectDockerToHost())
         $url = "http://host.docker.internal:$port/";
     else if (isDocker())
@@ -66,7 +66,7 @@ function setShareData($share)
     if ($share)
     {
         file_put_contents($prefix."sharedata.txt","");
-        if (file_exists($prefix."nosharedata.txt")) 
+        if (file_exists($prefix."nosharedata.txt"))
             unlink($prefix."nosharedata.txt");
     }
     else
@@ -86,10 +86,10 @@ function JSONDatetoString($jsondate)
 
 function GrafanaVersion()
 {
-    $content = file_get_contents("http://grafana:3000/api/health");
+    $content = file_get_contents("http://teslalogger_grafana:3000/api/health");
     $j = json_decode($content);
-    if (!empty($j->{"version"})) 
-        return $j->{"version"};	
+    if (!empty($j->{"version"}))
+        return $j->{"version"};
 
     return "?";
 }
