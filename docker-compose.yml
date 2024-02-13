@@ -15,8 +15,11 @@ services:
       - database
     environment:
       - TZ=Europe/Berlin
-    ports:
-      - 5010:5000
+    networks:
+      default:
+      nginx:
+        aliases:
+          - teslalogger_api
 
   database:
     image: mariadb:10.4.7
@@ -26,20 +29,18 @@ services:
     volumes:
       - ./TeslaLogger/sqlschema.sql:/docker-entrypoint-initdb.d/sqlschema.sql
       - ./TeslaLogger/mysql:/var/lib/mysql
-    ports:
-      - 3306:3306
     environment:
       - TZ=Europe/Berlin
+    networks:
+      - default
 
   grafana:
     image: grafana/grafana:10.0.1
     restart: always
     environment:
-      - GF_SECURITY_ADMIN_PASSWORD=teslalogger
+      #- GF_SECURITY_ADMIN_PASSWORD=teslalogger
       - GF_PLUGINS_ALLOW_LOADING_UNSIGNED_PLUGINS=natel-discrete-panel,pr0ps-trackmap-panel,teslalogger-timeline-panel
       - TZ=Europe/Berlin
-    ports:
-      - 3000:3000
     volumes:
       - ./TeslaLogger/bin:/etc/teslalogger
       - ./TeslaLogger/GrafanaDashboards/:/var/lib/grafana/dashboards/
@@ -47,8 +48,14 @@ services:
       - ./TeslaLogger/GrafanaDB:/var/lib/grafana/
       - ./TeslaLogger/GrafanaConfig/datasource.yaml:/etc/grafana/provisioning/datasources/datasource.yml
       - ./TeslaLogger/GrafanaConfig/sample.yaml:/etc/grafana/provisioning/dashboards/dashboards.yml
+      - ./TeslaLogger/GrafanaConfig/grafana.ini:/etc/grafana/grafana.ini
     depends_on:
       - database
+    networks:
+      default:
+      nginx:
+        aliases:
+          - teslalogger_grafana
 
   webserver:
     build: docker/webserver/.
@@ -60,10 +67,20 @@ services:
       - ./docker/teslalogger/Dockerfile:/tmp/teslalogger-DOCKER
       - ./TeslaLogger/GrafanaConfig/datasource.yaml:/tmp/datasource-DOCKER
       - teslalogger-tmp:/tmp/
-    ports:
-      - 8888:80
     environment:
       - TZ=Europe/Berlin
+    networks:
+      default:
+      nginx:
+        aliases:
+          - teslalogger_webserver
 
 volumes:
     teslalogger-tmp:
+
+networks:
+  default:
+
+  nginx:
+    name: nginx_network
+    external: true
